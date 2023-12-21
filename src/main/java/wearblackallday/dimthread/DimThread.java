@@ -20,6 +20,7 @@ package wearblackallday.dimthread;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLLoader;
 import wearblackallday.dimthread.init.ModGameRules;
 import wearblackallday.dimthread.thread.IMutableMainThread;
 import wearblackallday.dimthread.util.ServerManager;
@@ -37,6 +38,10 @@ public class DimThread {
 
     public static ThreadPool getThreadPool(MinecraftServer server) {
         return MANAGER.getThreadPool(server);
+    }
+
+    public static boolean isModPresent(String modid) {
+        return FMLLoader.getLoadingModList().getModFileById(modid) != null;
     }
 
     public static synchronized void swapThreadsAndRun(Runnable task, Object... threadedObjects) {

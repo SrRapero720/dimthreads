@@ -21,11 +21,10 @@ import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.*;
 import wearblackallday.dimthread.thread.IMutableMainThread;
 
-
 @Mixin(Level.class)
 public abstract class WorldMixin implements IMutableMainThread {
 
-	@Mutable @Shadow @Final private Thread thread;
+	@Shadow @Final @Mutable private Thread thread;
 
 	@Override
 	@Unique
