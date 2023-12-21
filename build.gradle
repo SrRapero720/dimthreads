@@ -21,6 +21,7 @@ minecraft {
     copyIdeResources = true
     runs {
         client {
+            taskName "${modid}-${modversion}-client"
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
@@ -34,6 +35,7 @@ minecraft {
         }
 
         server {
+            taskName "${modid}-${modversion}-server"
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
