@@ -26,10 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.RedstoneSide;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -46,24 +43,25 @@ public abstract class RedstoneWireBlockMixin {
 
 	/**
 	 * {@code RedstoneWireBlock#wiresGivePower} is not thread-safe since it's a global flag. To ensure
-	 * no interference between threads the field is replaced with this thread local one.
+	 * no interference between threads, the field is replaced with this thread local one.
 	 *
 	 * @see RedStoneWireBlock#isSignalSource(BlockState)
 	 * */
-	private final ThreadLocal<Boolean> wiresGivePowerSafe = ThreadLocal.withInitial(() -> true);
+	@Unique
+	private final ThreadLocal<Boolean> dimThreads$wiresGivePowerSafe = ThreadLocal.withInitial(() -> true);
 
 	@Inject(method = "calculateTargetStrength", at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/world/level/Level;getBestNeighborSignal(Lnet/minecraft/core/BlockPos;)I",
 			shift = At.Shift.BEFORE))
 	private void getReceivedRedstonePowerBefore(Level world, BlockPos pos, CallbackInfoReturnable<Integer> ci) {
-		this.wiresGivePowerSafe.set(false);
+		this.dimThreads$wiresGivePowerSafe.set(false);
 	}
 
 	@Inject(method = "calculateTargetStrength", at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/world/level/Level;getBestNeighborSignal(Lnet/minecraft/core/BlockPos;)I",
 			shift = At.Shift.AFTER))
 	private void getReceivedRedstonePowerAfter(Level world, BlockPos pos, CallbackInfoReturnable<Integer> ci) {
-		this.wiresGivePowerSafe.set(true);
+		this.dimThreads$wiresGivePowerSafe.set(true);
 	}
 
 	/**
@@ -72,7 +70,7 @@ public abstract class RedstoneWireBlockMixin {
 	 */
 	@Overwrite
 	public boolean isSignalSource(BlockState state) {
-		return this.wiresGivePowerSafe.get();
+		return this.dimThreads$wiresGivePowerSafe.get();
 	}
 
 	/**
@@ -81,7 +79,7 @@ public abstract class RedstoneWireBlockMixin {
 	 */
 	@Overwrite
 	public int getDirectSignal(BlockState state, BlockGetter world, BlockPos pos, Direction direction) {
-		return !this.wiresGivePowerSafe.get() ? 0 : state.getSignal(world, pos, direction);
+		return !this.dimThreads$wiresGivePowerSafe.get() ? 0 : state.getSignal(world, pos, direction);
 	}
 
 	/**
@@ -90,7 +88,7 @@ public abstract class RedstoneWireBlockMixin {
 	 */
 	@Overwrite
 	public int getSignal(BlockState state, BlockGetter world, BlockPos pos, Direction direction) {
-		if(!this.wiresGivePowerSafe.get() || direction == Direction.DOWN) {
+		if(!this.dimThreads$wiresGivePowerSafe.get() || direction == Direction.DOWN) {
 			return 0;
 		}
 

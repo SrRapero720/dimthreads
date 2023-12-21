@@ -23,10 +23,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraftforge.fml.loading.FMLLoader;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -36,22 +33,19 @@ import wearblackallday.dimthread.thread.IMutableMainThread;
 
 @Mixin(value = ServerChunkCache.class, priority = 1001)
 public abstract class ServerChunkManagerMixin extends ChunkSource implements IMutableMainThread {
-
-	@Shadow @Final @Mutable
-	Thread mainThread;
-
+	@Shadow @Final @Mutable Thread mainThread;
 	@Shadow @Final public ChunkMap chunkMap;
-
-	@Shadow @Final
-	public ServerLevel level;
+	@Shadow @Final public ServerLevel level;
 
 	@Override
-	public Thread getMainThread() {
+	@Unique
+	public Thread dimThreads$getMainThread() {
 		return this.mainThread;
 	}
 
 	@Override
-	public void setMainThread(Thread thread) {
+	@Unique
+	public void dimThreads$setMainThread(Thread thread) {
 		this.mainThread = thread;
 	}
 

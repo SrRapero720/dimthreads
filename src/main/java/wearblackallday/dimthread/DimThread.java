@@ -44,14 +44,14 @@ public class DimThread {
         Thread[] oldThreads = new Thread[threadedObjects.length];
 
         for (int i = 0; i < oldThreads.length; i++) {
-            oldThreads[i] = ((IMutableMainThread) threadedObjects[i]).getMainThread();
-            ((IMutableMainThread) threadedObjects[i]).setMainThread(currentThread);
+            oldThreads[i] = ((IMutableMainThread) threadedObjects[i]).dimThreads$getMainThread();
+            ((IMutableMainThread) threadedObjects[i]).dimThreads$setMainThread(currentThread);
         }
 
         task.run();
 
         for (int i = 0; i < oldThreads.length; i++) {
-            ((IMutableMainThread) threadedObjects[i]).setMainThread(oldThreads[i]);
+            ((IMutableMainThread) threadedObjects[i]).dimThreads$setMainThread(oldThreads[i]);
         }
     }
 

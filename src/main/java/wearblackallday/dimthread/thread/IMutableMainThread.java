@@ -19,8 +19,8 @@ package wearblackallday.dimthread.thread;
 
 public interface IMutableMainThread {
 
-	Thread getMainThread();
+	Thread dimThreads$getMainThread();
 
-	void setMainThread(Thread thread);
+	void dimThreads$setMainThread(Thread thread);
 
 }

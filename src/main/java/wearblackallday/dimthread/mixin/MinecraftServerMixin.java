@@ -103,7 +103,7 @@ public abstract class MinecraftServerMixin {
     }
 
     /**
-     * Shutdown all threadpools when the server stop.
+     * Shutdown all threadpools when the server stops.
      * Prevent server hang when stopping the server.
      */
     @Inject(method = "stopServer", at = @At("HEAD"))
