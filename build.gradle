@@ -10,7 +10,7 @@ group = modgroup
 version = "${mcversion}-v${modversion}"
 
 java {
-    archivesBaseName = 'Dimensional-Threading-Reforged'
+    archivesBaseName = modid
     targetCompatibility = JavaVersion.VERSION_17
     sourceCompatibility = JavaVersion.VERSION_17
 }
@@ -55,6 +55,12 @@ mixin {
     config "${modid}.mixins.json"
 }
 
+minecraft.runs.all {
+    lazyToken('minecraft_classpath') {
+        configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
+    }
+}
+
 repositories {
     mavenCentral()
     maven { url "https://repo.spongepowered.org/maven" }
@@ -75,13 +81,16 @@ repositories {
     }
 }
 
+configurations {
+    library
+    implementation.extendsFrom library
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${mcversion}-${fgversion}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    implementation("com.github.wearblackallday:JavaUtils:bd58640372") {
-        jarJar.ranged(it, "[bd58640372,)")
-    }
+    library "com.github.wearblackallday:JavaUtils:bd58640372"
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
@@ -90,7 +99,15 @@ jar {
         include 'README.md'
         include 'LICENSE'
     }
-
+    from {
+        configurations.library.collect {
+            it.isDirectory() ? it.matching {
+                exclude '*', 'META-INF/**'
+            } : zipTree(it).matching {
+                exclude '*', 'META-INF/**'
+            }
+        }
+    }
     manifest {
         attributes([
                 "Specification-Title": "${modid}",
@@ -102,13 +119,6 @@ jar {
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
                 "MixinConfigs": "${modid}.mixin.json"
         ])
-    }
-}
-
-jarJar {
-    fromRuntimeConfiguration()
-    dependencies {
-        include(dependency("com.github.wearblackallday:JavaUtils"))
     }
 }
 
