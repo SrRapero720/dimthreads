@@ -19,8 +19,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 @Mixin(value = MinecraftServer.class, priority = 1010)
 public abstract class MinecraftServerMixin {
@@ -29,6 +35,9 @@ public abstract class MinecraftServerMixin {
     @Shadow public abstract Iterable<ServerLevel> getAllLevels();
 
     @Unique private final AtomicReference<CrashInfo> dimthreads$initialException = new AtomicReference<>();
+
+    @Unique private Method dimThread$onPreLevelTick;
+    @Unique private Method dimThread$onPostLevelTick;
 
     /**
      * Returns an empty iterator to stop {@code MinecraftServer#tickWorlds} from ticking
