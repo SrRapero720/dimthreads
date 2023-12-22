@@ -28,8 +28,7 @@ public abstract class MinecraftServerMixin {
     @Shadow private PlayerList playerList;
     @Shadow public abstract Iterable<ServerLevel> getAllLevels();
 
-    @Unique
-    private final AtomicReference<CrashInfo> dimthreads$initialException = new AtomicReference<>();
+    @Unique private final AtomicReference<CrashInfo> dimthreads$initialException = new AtomicReference<>();
 
     /**
      * Returns an empty iterator to stop {@code MinecraftServer#tickWorlds} from ticking
@@ -67,13 +66,13 @@ public abstract class MinecraftServerMixin {
             }
 
             DimThread.swapThreadsAndRun(() -> {
-                ForgeEventFactory.onPreLevelTick(level, shouldKeepTicking);
+                ForgeEventFactory.onPreWorldTick(level, shouldKeepTicking);
                 try {
                     level.tick(shouldKeepTicking);
                 } catch (Throwable throwable) {
                     crash.set(new CrashInfo(level, throwable));
                 }
-                ForgeEventFactory.onPostLevelTick(level, shouldKeepTicking);
+                ForgeEventFactory.onPostWorldTick(level, shouldKeepTicking);
             }, level, level.getChunkSource());
         });
 
