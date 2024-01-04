@@ -9,8 +9,8 @@ plugins {
 group = modgroup
 version = "${mcversion}-v${modversion}"
 
-java {
-    archivesBaseName = modid
+base {
+    archivesName = modid
     targetCompatibility = JavaVersion.VERSION_17
     sourceCompatibility = JavaVersion.VERSION_17
 }
@@ -20,12 +20,10 @@ minecraft {
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     copyIdeResources = true
     runs {
-        client {
-            taskName "${modid}-${modversion}-client"
+        configureEach {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', modid
             property 'terminal.jline', 'true'
             mods {
                 "${modid}" {
@@ -34,31 +32,18 @@ minecraft {
             }
         }
 
+        client {
+            taskName "${modid}-client"
+        }
         server {
-            taskName "${modid}-${modversion}-server"
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', modid
-            property 'terminal.jline', 'true'
-            mods {
-                "${modid}" {
-                    source sourceSets.main
-                }
-            }
+            taskName "${modid}-server"
         }
     }
 }
 
 mixin {
-    add sourceSets.main, "${modid}.refmap.json"
-    config "${modid}.mixins.json"
-}
-
-minecraft.runs.all {
-    lazyToken('minecraft_classpath') {
-        configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
-    }
+    config "${modid}.${mixin_file_suffix}"
+    add sourceSets.main, "${modid}.${mixin_refmap_suffix}"
 }
 
 repositories {
@@ -74,23 +59,15 @@ repositories {
     maven {
         url "https://maven.blamejared.com"
     }
-    maven { url 'https://jitpack.io' }
     maven {
         name = "Jitpack"
         url = "https://jitpack.io"
     }
 }
 
-configurations {
-    library
-    implementation.extendsFrom library
-}
-
 dependencies {
     minecraft "net.minecraftforge:forge:${mcversion}-${fgversion}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-
-    library "com.github.wearblackallday:JavaUtils:bd58640372"
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
@@ -98,15 +75,6 @@ jar {
     from('./') {
         include 'README.md'
         include 'LICENSE'
-    }
-    from {
-        configurations.library.collect {
-            it.isDirectory() ? it.matching {
-                exclude '*', 'META-INF/**'
-            } : zipTree(it).matching {
-                exclude '*', 'META-INF/**'
-            }
-        }
     }
     manifest {
         attributes([
@@ -117,7 +85,7 @@ jar {
                 "Implementation-Version": "${modversion}",
                 "Implementation-Vendor" : "${modauthor}",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "MixinConfigs": "${modid}.mixin.json"
+                "MixinConfigs": "${modid}.${mixin_file_suffix}"
         ])
     }
 }
@@ -125,7 +93,7 @@ jar {
 // Process target resources with mod info
 tasks.processResources.outputs.upToDateWhen { false }
 processResources {
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta', "${modid}.${mixin_file_suffix}".toString()]) {
         expand(rootProject.properties)
     }
 }

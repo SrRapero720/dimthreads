@@ -1,21 +1,4 @@
-/*
- * This file is part of Dimensional Threading Reforged - https://github.com/CCr4ft3r/DimensionalThreading-Reforged
- * Copyright (C) WearBlackAllDay and contributors: https://github.com/WearBlackAllDay/DimensionalThreading
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-package wearblackallday.dimthread.mixin;
+package me.srrapero720.dimthread.mixin;
 
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.server.MinecraftServer;
@@ -28,9 +11,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import wearblackallday.dimthread.DimThread;
-import wearblackallday.dimthread.util.CrashInfo;
-import wearblackallday.util.ThreadPool;
+import me.srrapero720.dimthread.DimThread;
+import me.srrapero720.dimthread.util.CrashInfo;
+import me.srrapero720.dimthread.thread.ThreadPool;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
@@ -56,7 +39,7 @@ public abstract class MinecraftServerMixin {
      * @see MinecraftServerMixin#tickWorlds(BooleanSupplier, CallbackInfo)
      */
     @Redirect(method = "tickChildren", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/server/MinecraftServer;getWorldArray()[Lnet/minecraft/server/level/ServerLevel;"))
+        target = "Lnet/minecraft/server/MinecraftServer;getWorldArray()[Lnet/minecraft/server/level/ServerLevel;", remap = false))
     public ServerLevel[] tickWorlds(MinecraftServer instance) {
         return DimThread.MANAGER.isActive((MinecraftServer) (Object) this) ? new ServerLevel[]{} : getWorldArray();
     }
@@ -66,7 +49,7 @@ public abstract class MinecraftServerMixin {
      * they are all complete.
      */
     @Inject(method = "tickChildren", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/server/MinecraftServer;getWorldArray()[Lnet/minecraft/server/level/ServerLevel;"))
+        target = "Lnet/minecraft/server/MinecraftServer;getWorldArray()[Lnet/minecraft/server/level/ServerLevel;", remap = false))
     public void tickWorlds(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         if (!DimThread.MANAGER.isActive((MinecraftServer) (Object) this)) return;
 
