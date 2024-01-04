@@ -4,7 +4,7 @@ import me.srrapero720.dimthread.init.ModGameRules;
 import me.srrapero720.dimthread.thread.ThreadPool;
 import me.srrapero720.dimthread.util.ServerManager;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -61,7 +61,7 @@ public class DimThread {
         thread.setName(MOD_ID + "_server_" + name);
     }
 
-    public static void attach(Thread thread, ServerLevel world) {
+    public static void attach(Thread thread, ServerWorld world) {
         attach(thread, world.dimension().location().getPath());
     }
 

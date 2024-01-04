@@ -1,13 +1,13 @@
 package me.srrapero720.dimthread.gamerule;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.GameRules;
 
 import java.util.function.BiConsumer;
 
 public class BoolRule extends GameRule<GameRules.BooleanValue> {
 
-    protected BoolRule(String name, GameRules.Category category, GameRules.Type<GameRules.BooleanValue> rule) {
+    protected BoolRule(String name, GameRules.Category category, GameRules.RuleType<GameRules.BooleanValue> rule) {
         super(name, category, rule);
     }
 

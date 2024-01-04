@@ -3,7 +3,7 @@ package me.srrapero720.dimthread.util;
 import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.GameRules;
 import me.srrapero720.dimthread.init.ModGameRules;
 import me.srrapero720.dimthread.thread.ThreadPool;
 

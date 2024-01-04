@@ -1,10 +1,10 @@
 package me.srrapero720.dimthread.init;
 
 import me.srrapero720.dimthread.DimConfig;
+import net.minecraft.world.GameRules;
+import me.srrapero720.dimthread.DimThread;
 import me.srrapero720.dimthread.gamerule.BoolRule;
 import me.srrapero720.dimthread.gamerule.IntRule;
-import net.minecraft.world.level.GameRules;
-import me.srrapero720.dimthread.DimThread;
 
 public class ModGameRules {
 

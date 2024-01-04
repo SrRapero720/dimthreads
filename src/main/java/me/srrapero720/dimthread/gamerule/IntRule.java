@@ -2,13 +2,13 @@ package me.srrapero720.dimthread.gamerule;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.GameRules;
 
 import java.util.function.BiConsumer;
 
 public class IntRule extends GameRule<GameRules.IntegerValue> {
 
-    protected IntRule(String name, GameRules.Category category, GameRules.Type<GameRules.IntegerValue> rule) {
+    protected IntRule(String name, GameRules.Category category, GameRules.RuleType<GameRules.IntegerValue> rule) {
         super(name, category, rule);
     }
 
@@ -60,12 +60,12 @@ public class IntRule extends GameRule<GameRules.IntegerValue> {
                 this.initialValue, this.minimumValue, this.maximumValue, this.callback));
         }
 
-        private GameRules.Type<GameRules.IntegerValue> create(int def, int min, int max, BiConsumer<MinecraftServer, GameRules.IntegerValue> changedCallback) {
-            return new GameRules.Type<>(
+        private GameRules.RuleType<GameRules.IntegerValue> create(int def, int min, int max, BiConsumer<MinecraftServer, GameRules.IntegerValue> changedCallback) {
+            return new GameRules.RuleType<>(
                 () -> IntegerArgumentType.integer(min, max),
                 type -> new RestrictedIntegerValue(type, def, min, max),
                 changedCallback,
-                GameRules.GameRuleTypeVisitor::visitInteger
+                GameRules.IRuleEntryVisitor::visitInteger
             );
         }
 

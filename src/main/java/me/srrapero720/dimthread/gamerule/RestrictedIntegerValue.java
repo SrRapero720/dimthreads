@@ -1,26 +1,25 @@
 package me.srrapero720.dimthread.gamerule;
 
-import com.mojang.logging.LogUtils;
 import me.srrapero720.dimthread.mixin.IntegerValueAccessor;
-import net.minecraft.world.level.GameRules;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
+import net.minecraft.world.GameRules;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class RestrictedIntegerValue extends GameRules.IntegerValue {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger("DimThread");
 
     private final int min;
     private final int max;
 
-    public RestrictedIntegerValue(GameRules.Type<GameRules.IntegerValue> type, int def, int min, int max) {
+    public RestrictedIntegerValue(GameRules.RuleType<GameRules.IntegerValue> type, int def, int min, int max) {
         super(type, def);
         this.min = min;
         this.max = max;
     }
 
     @Override
-    protected void deserialize(@NotNull String value) {
+    protected void deserialize(String value) {
         final int i = safeParse(value);
 
         if (i < this.min || i > this.max) {
@@ -30,7 +29,7 @@ public class RestrictedIntegerValue extends GameRules.IntegerValue {
     }
 
     @Override
-    public boolean tryDeserialize(@NotNull String input) {
+    public boolean tryDeserialize(String input) {
         try {
             int value = Integer.parseInt(input);
 
@@ -46,7 +45,7 @@ public class RestrictedIntegerValue extends GameRules.IntegerValue {
     }
 
     @Override
-    protected GameRules.@NotNull IntegerValue copy() {
+    protected GameRules.IntegerValue copy() {
         return new RestrictedIntegerValue(this.type, ((IntegerValueAccessor) this).getValue(), this.min, this.max);
     }
 

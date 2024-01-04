@@ -1,16 +1,23 @@
 package me.srrapero720.dimthread.util;
 
-import net.minecraft.CrashReport;
-import net.minecraft.ReportedException;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.ReportedException;
+import net.minecraft.world.server.ServerWorld;
 
 import static me.srrapero720.dimthread.DimThread.LOGGER;
 
-public record CrashInfo(ServerLevel world, Throwable throwable) {
+public class CrashInfo {
+    public final ServerWorld level;
+    public final Throwable throwable;
+
+    public CrashInfo(ServerWorld world, Throwable throwable) {
+        this.level = world;
+        this.throwable = throwable;
+    }
 
     public void crash(String title) {
         CrashReport report = CrashReport.forThrowable(this.throwable, title);
-        this.world.fillReportDetails(report);
+        this.level.fillReportDetails(report);
         throw new ReportedException(report);
     }
 

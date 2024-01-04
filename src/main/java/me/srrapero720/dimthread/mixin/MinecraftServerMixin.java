@@ -1,43 +1,35 @@
 package me.srrapero720.dimthread.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import me.srrapero720.dimthread.DimConfig;
 import me.srrapero720.dimthread.DimThread;
 import me.srrapero720.dimthread.thread.ThreadPool;
 import me.srrapero720.dimthread.util.CrashInfo;
-import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
+import net.minecraft.network.play.server.SUpdateTimePacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.players.PlayerList;
-import net.minecraft.world.level.GameRules;
-import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraft.server.management.PlayerList;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.fml.hooks.BasicEventHooks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
 @Mixin(value = MinecraftServer.class, priority = 1010)
 public abstract class MinecraftServerMixin {
     @Shadow private int tickCount;
     @Shadow private PlayerList playerList;
-    @Shadow public abstract Iterable<ServerLevel> getAllLevels();
+    @Shadow public abstract Iterable<ServerWorld> getAllLevels();
+    @Shadow protected abstract ServerWorld[] getWorldArray();
 
     @Unique private final AtomicReference<CrashInfo> dimthreads$initialException = new AtomicReference<>();
 
-    @Unique private Method dimThread$onPreLevelTick;
-    @Unique private Method dimThread$onPostLevelTick;
 
     /**
      * Returns an empty iterator to stop {@code MinecraftServer#tickWorlds} from ticking
@@ -45,10 +37,10 @@ public abstract class MinecraftServerMixin {
      *
      * @see MinecraftServerMixin#tickWorlds(BooleanSupplier, CallbackInfo)
      */
-    @WrapOperation(method = "tickChildren", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/server/MinecraftServer;getWorldArray()[Lnet/minecraft/server/level/ServerLevel;", remap = false))
-    public ServerLevel[] tickWorlds(MinecraftServer instance, Operation<ServerLevel[]> original) {
-        return DimThread.MANAGER.isActive((MinecraftServer) (Object) this) ? new ServerLevel[]{} : original.call(instance);
+    @Redirect(method = "tickChildren", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/MinecraftServer;getWorldArray()[Lnet/minecraft/world/server/ServerWorld;", remap = false))
+    public ServerWorld[] tickWorlds(MinecraftServer instance) {
+        return DimThread.MANAGER.isActive((MinecraftServer) (Object) this) ? new ServerWorld[]{} : getWorldArray();
     }
 
     /**
@@ -56,7 +48,7 @@ public abstract class MinecraftServerMixin {
      * they are all complete.
      */
     @Inject(method = "tickChildren", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/server/MinecraftServer;getWorldArray()[Lnet/minecraft/server/level/ServerLevel;", remap = false))
+        target = "Lnet/minecraft/server/MinecraftServer;getWorldArray()[Lnet/minecraft/world/server/ServerWorld;", remap = false))
     public void tickWorlds(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         if (!DimThread.MANAGER.isActive((MinecraftServer) (Object) this)) return;
 
@@ -67,7 +59,7 @@ public abstract class MinecraftServerMixin {
             DimThread.attach(Thread.currentThread(), level);
 
             if (this.tickCount % 20 == 0) {
-                ClientboundSetTimePacket timeUpdatePacket = new ClientboundSetTimePacket(
+                SUpdateTimePacket timeUpdatePacket = new SUpdateTimePacket(
                     level.getGameTime(), level.getDayTime(),
                     level.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT));
 
@@ -75,13 +67,13 @@ public abstract class MinecraftServerMixin {
             }
 
             DimThread.swapThreadsAndRun(() -> {
-                ForgeEventFactory.onPreWorldTick(level, shouldKeepTicking);
+                BasicEventHooks.onPreWorldTick(level);
                 try {
                     level.tick(shouldKeepTicking);
                 } catch (Throwable throwable) {
                     crash.set(new CrashInfo(level, throwable));
                 }
-                ForgeEventFactory.onPostWorldTick(level, shouldKeepTicking);
+                BasicEventHooks.onPostWorldTick(level);
             }, level, level.getChunkSource());
         });
 
