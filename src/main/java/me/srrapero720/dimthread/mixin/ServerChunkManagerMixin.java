@@ -1,20 +1,20 @@
 package me.srrapero720.dimthread.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import me.srrapero720.dimthread.DimThread;
+import me.srrapero720.dimthread.thread.IMutableMainThread;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import me.srrapero720.dimthread.DimThread;
-import me.srrapero720.dimthread.thread.IMutableMainThread;
 
-@Mixin(value = ServerChunkCache.class, priority = 1001)
+@Mixin(value = ServerChunkCache.class, priority = 100)
 public abstract class ServerChunkManagerMixin extends ChunkSource implements IMutableMainThread {
 	@Shadow @Final @Mutable Thread mainThread;
 	@Shadow @Final public ChunkMap chunkMap;
@@ -40,9 +40,9 @@ public abstract class ServerChunkManagerMixin extends ChunkSource implements IMu
 		}
 	}
 
-	@Redirect(method = "getChunk", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;currentThread()Ljava/lang/Thread;"))
-	public Thread currentThread(int p_8360_, int p_8361_, ChunkStatus p_8362_, boolean p_8363) {
-		Thread thread = Thread.currentThread();
+	@WrapOperation(method = "getChunk", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;currentThread()Ljava/lang/Thread;"))
+	public Thread currentThread(Operation<Thread> original) {
+		Thread thread = original.call();
 
 		if(DimThread.MANAGER.isActive(this.level.getServer()) && DimThread.owns(thread)) {
 			return this.mainThread;

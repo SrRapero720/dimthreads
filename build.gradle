@@ -49,6 +49,7 @@ mixin {
 repositories {
     mavenCentral()
     maven { url "https://repo.spongepowered.org/maven" }
+    maven { url "https://maven.fabricmc.net/" }
     maven { url "https://maven.tterrag.com/" }
     maven {
         url 'https://www.cursemaven.com'
@@ -67,11 +68,16 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${mcversion}-${fgversion}"
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    annotationProcessor "net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5"
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.5"))
+    implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.3.5")) {
+        jarJar.ranged(it, "[0.3.5,)")
+    }
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
 jar {
+    archiveClassifier = 'ignore'
     from('./') {
         include 'README.md'
         include 'LICENSE'
@@ -89,6 +95,11 @@ jar {
         ])
     }
 }
+
+jarJar.enable()
+
+tasks.jarJar.finalizedBy('reobfJarJar')
+tasks.jarJar.archiveClassifier = ''
 
 // Process target resources with mod info
 tasks.processResources.outputs.upToDateWhen { false }

@@ -1,5 +1,10 @@
 package me.srrapero720.dimthread.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import me.srrapero720.dimthread.DimThread;
+import me.srrapero720.dimthread.thread.ThreadPool;
+import me.srrapero720.dimthread.util.CrashInfo;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -9,16 +14,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import me.srrapero720.dimthread.DimThread;
-import me.srrapero720.dimthread.util.CrashInfo;
-import me.srrapero720.dimthread.thread.ThreadPool;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
-@Mixin(MinecraftServer.class)
+@Mixin(value = MinecraftServer.class, priority = 500)
 public abstract class MinecraftServerMixin {
 
     @Shadow
@@ -38,10 +39,10 @@ public abstract class MinecraftServerMixin {
      *
      * @see MinecraftServerMixin#tickWorlds(BooleanSupplier, CallbackInfo)
      */
-    @Redirect(method = "tickChildren", at = @At(value = "INVOKE",
+    @WrapOperation(method = "tickChildren", at = @At(value = "INVOKE",
         target = "Lnet/minecraft/server/MinecraftServer;getWorldArray()[Lnet/minecraft/server/level/ServerLevel;", remap = false))
-    public ServerLevel[] tickWorlds(MinecraftServer instance) {
-        return DimThread.MANAGER.isActive((MinecraftServer) (Object) this) ? new ServerLevel[]{} : getWorldArray();
+    public ServerLevel[] tickWorlds(MinecraftServer instance, Operation<ServerLevel[]> original) {
+        return DimThread.MANAGER.isActive((MinecraftServer) (Object) this) ? new ServerLevel[]{} : original.call(instance);
     }
 
     /**
