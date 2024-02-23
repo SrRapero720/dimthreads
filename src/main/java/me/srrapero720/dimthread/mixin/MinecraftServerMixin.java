@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
-@Mixin(value = MinecraftServer.class, priority = 500)
+@Mixin(value = MinecraftServer.class, priority = 1001)
 public abstract class MinecraftServerMixin {
 
     @Shadow

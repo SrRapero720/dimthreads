@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = ServerChunkCache.class, priority = 100)
+@Mixin(value = ServerChunkCache.class, priority = 1001)
 public abstract class ServerChunkManagerMixin extends ChunkSource implements IMutableMainThread {
 	@Shadow @Final @Mutable Thread mainThread;
 	@Shadow @Final public ChunkMap chunkMap;
