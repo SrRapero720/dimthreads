@@ -47,7 +47,7 @@ public class DimThread {
      * Makes it easy to understand what is happening in crash reports and helps identify dimthread workers.
      */
     public static void attach(Thread thread, String name) {
-        thread.setName(MOD_ID + "_" + name);
+        thread.setName(MOD_ID + "_server_" + name);
     }
 
     public static void attach(Thread thread, ServerLevel world) {
@@ -58,6 +58,6 @@ public class DimThread {
      * Checks if the given thread is a dimthread worker by checking the name. Probably quite fragile...
      */
     public static boolean owns(Thread thread) {
-        return thread.getName().startsWith(MOD_ID);
+        return thread.getName().startsWith(MOD_ID + "_server_");
     }
 }
