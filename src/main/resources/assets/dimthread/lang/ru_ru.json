@@ -1,0 +1,4 @@
+{
+  "gamerule.dimthread_active": "Включить многопоточность измерений",
+  "gamerule.dimthread_thread_count": "Число потоков измерений"
+}
