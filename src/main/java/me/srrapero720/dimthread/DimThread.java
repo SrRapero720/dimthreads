@@ -5,21 +5,29 @@ import me.srrapero720.dimthread.thread.ThreadPool;
 import me.srrapero720.dimthread.util.ServerManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.loading.FMLLoader;
 import me.srrapero720.dimthread.thread.IMutableMainThread;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Mod(DimThread.MOD_ID)
+@Mod.EventBusSubscriber(modid = DimThread.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DimThread {
     public static final String MOD_ID = "dimthread";
     public static final ServerManager MANAGER = new ServerManager();
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
     public DimThread() {
-        ModGameRules.register();
         DimConfig.register();
+
+    }
+
+    @SubscribeEvent
+    public static void onCommonSetupEvent(FMLCommonSetupEvent e) {
+        ModGameRules.register();
     }
 
     public static ThreadPool getThreadPool(MinecraftServer server) {
