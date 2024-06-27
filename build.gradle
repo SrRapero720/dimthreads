@@ -3,7 +3,7 @@ import net.darkhax.curseforgegradle.TaskPublishCurseForge
 plugins {
     id 'java'
     id 'idea'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'net.minecraftforge.gradle' version '6.+'
     id 'org.spongepowered.mixin' version '0.7.+'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
     id 'com.modrinth.minotaur' version '2.+'
@@ -13,14 +13,15 @@ plugins {
 base {
     archivesName = modid
     version = "$modloader-mc$mcversion-v$modversion"
-    targetCompatibility = JavaVersion.VERSION_17
-    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_21
 }
 
 minecraft {
     mappings channel: "${mappingsch}", version: "${mappings_version}"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     copyIdeResources = true
+    reobf = false
     runs {
         configureEach {
             workingDirectory project.file('run')
@@ -84,8 +85,8 @@ dependencies {
         jarJar.ranged(it, "[0.3.5,)")
     }
 
-    // MIXIN DEPENDENCIES
-    implementation fg.deobf("maven.modrinth:tardis-refined:forge-mc1.20.1-v2.0.7")
+    // Hack fix for now, force jopt-simple to be exactly 5.0.4 because Mojang ships that version, but some transitive dependencies request 6.0+
+    implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
 }
 
 jar {
@@ -101,15 +102,10 @@ jar {
                 "MixinConfigs": "${modid}.${mixin_file_suffix}"
         ])
     }
-    finalizedBy("reobfJar")
-    afterEvaluate {
-        reobfJar.finalizedBy("jarJar")
-    }
+    finalizedBy("jarJar")
 }
 
 jarJar.enable()
-
-tasks.jarJar.finalizedBy('reobfJarJar')
 tasks.jarJar.archiveClassifier = ''
 
 // Process target resources with mod info
@@ -137,7 +133,7 @@ task curseforge(type: TaskPublishCurseForge) {
 
     def mainFile = upload(curseforgeid, jar)
     mainFile.displayName = getVersionBuildName()
-    mainFile.addModLoader(modloader.toLowerCase().capitalize(), "NeoForge")
+    mainFile.addModLoader(modloader.toLowerCase().capitalize())
     mainFile.addGameVersion(mcversion, "server", "client")
     mainFile.addIncompatibility("dimensional-threading-reforged")
     mainFile.changelog = getChangelogText(false)
@@ -155,7 +151,10 @@ modrinth {
     versionType = versiontype
     gameVersions = [ mcversion ]
     changelog = getChangelogText(true)
-    loaders = [ "forge", "neoforge" ]
+    loaders = [ "forge" ]
+}
+afterEvaluate {
+    tasks.getByName("modrinth").dependsOn("jarJar")
 }
 
 String getVersionBuildName() {
@@ -169,4 +168,10 @@ String getChangelogText(boolean latest) {
         result += line + "\n"
     }
     return result
+}
+
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
 }
