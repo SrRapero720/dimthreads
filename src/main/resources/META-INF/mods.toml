@@ -1,6 +1,6 @@
 modLoader = "javafml" #mandatory
 loaderVersion = "${fgloaderrange}" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
-license = "GNU LGPL 3.0"
+license = "$modlicense"
 
 [[mods]] #mandatory
     modId="${modid}"
