@@ -75,13 +75,7 @@ dependencies {
     }
 }
 
-// Example for how to get properties into the manifest for reading at runtime.
 jar {
-    archiveClassifier = 'ignore'
-    from('./') {
-        include 'README.md'
-        include 'LICENSE'
-    }
     manifest {
         attributes([
                 "Specification-Title": "${modid}",
@@ -93,6 +87,10 @@ jar {
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
                 "MixinConfigs": "${modid}.${mixin_file_suffix}"
         ])
+    }
+    finalizedBy("reobfJar")
+    afterEvaluate {
+        reobfJar.finalizedBy("jarJar")
     }
 }
 
@@ -109,7 +107,6 @@ processResources {
     }
 }
 
-jar.finalizedBy('reobfJar')
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
