@@ -10,6 +10,8 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static me.srrapero720.dimthread.DimThread.MOD_ID;
+
 public class ThreadPool {
 	private ThreadPoolExecutor executor;
 	private final int threadCount;
@@ -126,7 +128,12 @@ public class ThreadPool {
 
 	public void restart() {
 		if(this.executor == null || this.executor.isShutdown()) {
-			this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(this.threadCount);
+			this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(this.threadCount, r -> {
+				Thread t  = new Thread(r);
+				t.setDaemon(true);
+				t.setName(MOD_ID + "_server_" + "unassigned");
+				return t;
+			});
 		}
 	}
 
