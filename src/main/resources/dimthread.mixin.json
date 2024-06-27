@@ -7,10 +7,10 @@
   "mixins": [
     "EntityMixin",
     "IntegerValueAccessor",
+    "ILevelMixin",
     "MinecraftServerMixin",
     "RedstoneWireBlockMixin",
-    "ServerChunkManagerMixin",
-    "LevelMixin"
+    "ServerChunkManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = ServerChunkCache.class, priority = 1001)
 public abstract class ServerChunkManagerMixin extends ChunkSource implements IMutableMainThread {
-	@Shadow @Final @Mutable Thread mainThread;
+	@Shadow public Thread mainThread;
 	@Shadow @Final public ChunkMap chunkMap;
 	@Shadow @Final public ServerLevel level;
 
@@ -36,7 +36,7 @@ public abstract class ServerChunkManagerMixin extends ChunkSource implements IMu
 	private void getTotalChunksLoadedCount(CallbackInfoReturnable<Integer> ci) {
 		if(!FMLLoader.isProduction()) {
 			int count = this.chunkMap.getTickingGenerated();
-			if(count < 441)ci.setReturnValue(441);
+			if(count < 441) ci.setReturnValue(441);
 		}
 	}
 

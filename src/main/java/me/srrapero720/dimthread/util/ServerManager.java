@@ -12,7 +12,6 @@ import java.util.ConcurrentModificationException;
 import java.util.Map;
 
 public class ServerManager {
-
 	private final Map<MinecraftServer, Boolean> actives = Collections.synchronizedMap(new Object2BooleanArrayMap<>());
 	public final Map<MinecraftServer, ThreadPool> threadPools = Collections.synchronizedMap(new Object2ObjectArrayMap<>());
 
@@ -37,5 +36,10 @@ public class ServerManager {
 
 		this.threadPools.put(server, new ThreadPool(value.get()));
 		current.shutdown();
+	}
+
+	public void clear() {
+		actives.clear();
+		threadPools.clear();
 	}
 }

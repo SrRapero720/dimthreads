@@ -126,7 +126,7 @@ public class ThreadPool {
 
 	public void restart() {
 		if(this.executor == null || this.executor.isShutdown()) {
-			this.executor = (ThreadPoolExecutor)Executors.newFixedThreadPool(this.threadCount);
+			this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(this.threadCount);
 		}
 	}
 

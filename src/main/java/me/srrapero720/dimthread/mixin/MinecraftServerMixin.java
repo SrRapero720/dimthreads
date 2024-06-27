@@ -21,17 +21,9 @@ import java.util.function.BooleanSupplier;
 
 @Mixin(value = MinecraftServer.class, priority = 1010)
 public abstract class MinecraftServerMixin {
-
-    @Shadow
-    private int tickCount;
-    @Shadow
-    private PlayerList playerList;
-
-    @Shadow
-    public abstract Iterable<ServerLevel> getAllLevels();
-
-    @Shadow(remap = false)
-    protected abstract ServerLevel[] getWorldArray();
+    @Shadow private int tickCount;
+    @Shadow private PlayerList playerList;
+    @Shadow public abstract Iterable<ServerLevel> getAllLevels();
 
     /**
      * Returns an empty iterator to stop {@code MinecraftServer#tickWorlds} from ticking
@@ -57,32 +49,32 @@ public abstract class MinecraftServerMixin {
         AtomicReference<CrashInfo> crash = new AtomicReference<>();
         ThreadPool pool = DimThread.getThreadPool((MinecraftServer) (Object) this);
 
-        pool.execute(this.getAllLevels().iterator(), serverWorld -> {
-            DimThread.attach(Thread.currentThread(), serverWorld);
+        pool.execute(this.getAllLevels().iterator(), level -> {
+            DimThread.attach(Thread.currentThread(), level);
 
             if (this.tickCount % 20 == 0) {
                 ClientboundSetTimePacket timeUpdatePacket = new ClientboundSetTimePacket(
-                    serverWorld.getGameTime(), serverWorld.getDayTime(),
-                    serverWorld.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT));
+                    level.getGameTime(), level.getDayTime(),
+                    level.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT));
 
-                this.playerList.broadcastAll(timeUpdatePacket, serverWorld.dimension());
+                this.playerList.broadcastAll(timeUpdatePacket, level.dimension());
             }
 
             DimThread.swapThreadsAndRun(() -> {
-                net.minecraftforge.event.ForgeEventFactory.onPreLevelTick(serverWorld, shouldKeepTicking);
+                net.minecraftforge.event.ForgeEventFactory.onPreLevelTick(level, shouldKeepTicking);
                 try {
-                    serverWorld.tick(shouldKeepTicking);
+                    level.tick(shouldKeepTicking);
                 } catch (Throwable throwable) {
-                    crash.set(new CrashInfo(serverWorld, throwable));
+                    crash.set(new CrashInfo(level, throwable));
                 }
-                net.minecraftforge.event.ForgeEventFactory.onPostLevelTick(serverWorld, shouldKeepTicking);
-            }, serverWorld, serverWorld.getChunkSource());
+                net.minecraftforge.event.ForgeEventFactory.onPostLevelTick(level, shouldKeepTicking);
+            }, level, level.getChunkSource());
         });
 
         pool.awaitCompletion();
 
         if (crash.get() != null) {
-            crash.get().crash("Exception ticking world");
+            crash.get().crash("Exception ticking world (asynchronously)");
         }
     }
 
@@ -93,5 +85,6 @@ public abstract class MinecraftServerMixin {
     @Inject(method = "stopServer", at = @At("HEAD"))
     public void shutdownThreadpool(CallbackInfo ci) {
         DimThread.MANAGER.threadPools.forEach((server, pool) -> pool.shutdown());
+        DimThread.MANAGER.clear();
     }
 }
