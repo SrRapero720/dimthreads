@@ -8,15 +8,18 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLLoader;
 import me.srrapero720.dimthread.thread.IMutableMainThread;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Mod(DimThread.MOD_ID)
 public class DimThread {
-
     public static final String MOD_ID = "dimthread";
     public static final ServerManager MANAGER = new ServerManager();
+    public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
     public DimThread() {
-        ModGameRules.registerGameRules();
+        ModGameRules.register();
+        DimConfig.register();
     }
 
     public static ThreadPool getThreadPool(MinecraftServer server) {

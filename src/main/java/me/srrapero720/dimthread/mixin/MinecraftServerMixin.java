@@ -2,6 +2,7 @@ package me.srrapero720.dimthread.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import me.srrapero720.dimthread.DimConfig;
 import me.srrapero720.dimthread.DimThread;
 import me.srrapero720.dimthread.thread.ThreadPool;
 import me.srrapero720.dimthread.util.CrashInfo;
@@ -10,8 +11,10 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.GameRules;
+import net.minecraftforge.event.ForgeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -24,6 +27,9 @@ public abstract class MinecraftServerMixin {
     @Shadow private int tickCount;
     @Shadow private PlayerList playerList;
     @Shadow public abstract Iterable<ServerLevel> getAllLevels();
+
+    @Unique
+    private final AtomicReference<CrashInfo> dimthreads$initialException = new AtomicReference<>();
 
     /**
      * Returns an empty iterator to stop {@code MinecraftServer#tickWorlds} from ticking
@@ -38,7 +44,7 @@ public abstract class MinecraftServerMixin {
     }
 
     /**
-     * Distributes world ticking over 3 worker threads (one for each dimension) and waits until
+     * Distributes world ticking over (at least) 3 worker threads (one for each dimension) and waits until
      * they are all complete.
      */
     @Inject(method = "tickChildren", at = @At(value = "INVOKE",
@@ -61,20 +67,24 @@ public abstract class MinecraftServerMixin {
             }
 
             DimThread.swapThreadsAndRun(() -> {
-                net.minecraftforge.event.ForgeEventFactory.onPreLevelTick(level, shouldKeepTicking);
+                ForgeEventFactory.onPreLevelTick(level, shouldKeepTicking);
                 try {
                     level.tick(shouldKeepTicking);
                 } catch (Throwable throwable) {
                     crash.set(new CrashInfo(level, throwable));
                 }
-                net.minecraftforge.event.ForgeEventFactory.onPostLevelTick(level, shouldKeepTicking);
+                ForgeEventFactory.onPostLevelTick(level, shouldKeepTicking);
             }, level, level.getChunkSource());
         });
 
         pool.awaitCompletion();
 
         if (crash.get() != null) {
-            crash.get().crash("Exception ticking world (asynchronously)");
+            if (DimConfig.IGNORE_TICK_CRASH.get() && dimthreads$initialException.compareAndSet(null, crash.get())) {
+                crash.get().report("Exception ticking world (asynchronously) -> EFFECTIVELY IGNORED");
+            } else {
+                crash.get().crash("Exception ticking world (asynchronously)");
+            }
         }
     }
 
