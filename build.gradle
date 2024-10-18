@@ -6,7 +6,6 @@ plugins {
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 
-group = modgroup
 version = "${mcversion}-v${modversion}"
 
 base {
@@ -57,13 +56,7 @@ repositories {
             includeGroup "curse.maven"
         }
     }
-    maven {
-        url "https://maven.blamejared.com"
-    }
-    maven {
-        name = "Jitpack"
-        url = "https://jitpack.io"
-    }
+    maven { url "https://jitpack.io" }
 }
 
 dependencies {
@@ -105,8 +98,4 @@ processResources {
     filesMatching(['META-INF/mods.toml', 'pack.mcmeta', "${modid}.${mixin_file_suffix}".toString()]) {
         expand(rootProject.properties)
     }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
