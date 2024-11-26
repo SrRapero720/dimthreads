@@ -1,4 +1,4 @@
-package me.srrapero720.dimthread.mixin;
+package me.srrapero720.dimthread.mixin.impl;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;

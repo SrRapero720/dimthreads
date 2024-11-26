@@ -1,4 +1,4 @@
-package me.srrapero720.dimthread.mixin;
+package me.srrapero720.dimthread.mixin.impl;
 
 import me.srrapero720.dimthread.thread.IMutableMainThread;
 import net.minecraft.world.level.Level;

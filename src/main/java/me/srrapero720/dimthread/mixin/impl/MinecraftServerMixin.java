@@ -1,4 +1,4 @@
-package me.srrapero720.dimthread.mixin;
+package me.srrapero720.dimthread.mixin.impl;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -28,8 +28,7 @@ public abstract class MinecraftServerMixin {
     @Shadow private PlayerList playerList;
     @Shadow public abstract Iterable<ServerLevel> getAllLevels();
 
-    @Unique
-    private final AtomicReference<CrashInfo> dimthreads$initialException = new AtomicReference<>();
+    @Unique private final AtomicReference<CrashInfo> dimthreads$initialException = new AtomicReference<>();
 
     /**
      * Returns an empty iterator to stop {@code MinecraftServer#tickWorlds} from ticking
@@ -55,7 +54,7 @@ public abstract class MinecraftServerMixin {
         AtomicReference<CrashInfo> crash = new AtomicReference<>();
         ThreadPool pool = DimThread.getThreadPool((MinecraftServer) (Object) this);
 
-        pool.execute(this.getAllLevels().iterator(), level -> {
+        pool.execute(this.getAllLevels(), level -> {
             DimThread.attach(Thread.currentThread(), level);
 
             if (this.tickCount % 20 == 0) {

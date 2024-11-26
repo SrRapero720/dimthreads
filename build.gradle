@@ -24,6 +24,7 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'terminal.jline', 'true'
+            arg "--nogui"
             mods {
                 "${modid}" {
                     source sourceSets.main
@@ -57,6 +58,19 @@ repositories {
         }
     }
     maven { url "https://jitpack.io" }
+
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        forRepositories(fg.repository) // Only add this if you're using ForgeGradle, otherwise remove this line
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
@@ -66,6 +80,9 @@ dependencies {
     implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.3.5")) {
         jarJar.ranged(it, "[0.3.5,)")
     }
+
+    // MIXIN DEPENDENCIES
+    implementation fg.deobf("maven.modrinth:tardis-refined:forge-mc1.20.1-v2.0.7")
 }
 
 jar {

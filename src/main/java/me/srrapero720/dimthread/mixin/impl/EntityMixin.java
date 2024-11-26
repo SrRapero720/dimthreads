@@ -1,4 +1,4 @@
-package me.srrapero720.dimthread.mixin;
+package me.srrapero720.dimthread.mixin.impl;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -14,7 +14,7 @@ import me.srrapero720.dimthread.DimThread;
 public abstract class EntityMixin {
 
     @Shadow
-    public abstract Entity changeDimension(ServerLevel destination);
+    public abstract Entity changeDimension(ServerLevel destination, ITeleporter teleporter);
 
     /**
      * Schedules moving entities between dimensions to the server thread. Once all the world finish ticking,
@@ -28,7 +28,7 @@ public abstract class EntityMixin {
         if (!DimThread.MANAGER.isActive(destination.getServer())) return;
 
         if (DimThread.owns(Thread.currentThread())) {
-            destination.getServer().execute(() -> this.changeDimension(destination));
+            destination.getServer().execute(() -> this.changeDimension(destination, teleporter));
             cir.setReturnValue(null);
         }
     }

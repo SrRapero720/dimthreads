@@ -1,4 +1,4 @@
-package me.srrapero720.dimthread.mixin;
+package me.srrapero720.dimthread.mixin.impl;
 
 import net.minecraft.world.level.GameRules;
 import org.spongepowered.asm.mixin.Mixin;

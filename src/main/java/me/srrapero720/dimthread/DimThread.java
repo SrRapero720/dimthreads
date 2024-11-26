@@ -22,7 +22,6 @@ public class DimThread {
 
     public DimThread() {
         DimConfig.register();
-
     }
 
     @SubscribeEvent

@@ -1,7 +1,7 @@
 package me.srrapero720.dimthread.gamerule;
 
 import com.mojang.logging.LogUtils;
-import me.srrapero720.dimthread.mixin.IntegerValueAccessor;
+import me.srrapero720.dimthread.mixin.impl.IntegerValueAccessor;
 import net.minecraft.world.level.GameRules;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
