@@ -1,0 +1,14 @@
+accessWidener v2 named
+
+# CLASSES
+accessible class net/minecraft/world/level/GameRules$VisitorCaller
+
+# METHODS
+accessible method net/minecraft/world/level/GameRules$Type <init> (Ljava/util/function/Supplier;Ljava/util/function/Function;Ljava/util/function/BiConsumer;Lnet/minecraft/world/level/GameRules$VisitorCaller;)V
+accessible method net/minecraft/world/level/GameRules register (Ljava/lang/String;Lnet/minecraft/world/level/GameRules$Category;Lnet/minecraft/world/level/GameRules$Type;)Lnet/minecraft/world/level/GameRules$Key;
+accessible method net/minecraft/world/level/GameRules$BooleanValue create (ZLjava/util/function/BiConsumer;)Lnet/minecraft/world/level/GameRules$Type;
+accessible method net/minecraft/world/level/GameRules$GameRuleTypeVisitor visitInteger (Lnet/minecraft/world/level/GameRules$Key;Lnet/minecraft/world/level/GameRules$Type;)V
+
+# FIELDS
+mutable field net/minecraft/world/level/Level thread Ljava/lang/Thread;
+mutable field net/minecraft/server/level/ServerChunkCache mainThread Ljava/lang/Thread;

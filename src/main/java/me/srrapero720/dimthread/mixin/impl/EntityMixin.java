@@ -9,12 +9,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import me.srrapero720.dimthread.DimThread;
 
-import javax.annotation.Nullable;
-
 @Mixin(Entity.class)
 public abstract class EntityMixin {
 
-    @Shadow @Nullable public abstract Entity changeDimension(DimensionTransition pTransition);
+    @Shadow public abstract Entity changeDimension(DimensionTransition pTransition);
 
     /**
      * Schedules moving entities between dimensions to the server thread. Once all the world finish ticking,
