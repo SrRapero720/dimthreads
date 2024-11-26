@@ -3,29 +3,23 @@ package me.srrapero720.dimthread;
 import me.srrapero720.dimthread.init.ModGameRules;
 import me.srrapero720.dimthread.thread.ThreadPool;
 import me.srrapero720.dimthread.util.ServerManager;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.loading.FMLLoader;
 import me.srrapero720.dimthread.thread.IMutableMainThread;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(DimThread.MOD_ID)
-@Mod.EventBusSubscriber(modid = DimThread.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class DimThread {
+public class DimThread implements ModInitializer {
     public static final String MOD_ID = "dimthread";
     public static final ServerManager MANAGER = new ServerManager();
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+    public static DimConfig CONFIG;
 
-    public DimThread() {
-        DimConfig.register();
-    }
-
-    @SubscribeEvent
-    public static void onCommonSetupEvent(FMLCommonSetupEvent e) {
+    @Override
+    public void onInitialize() {
+        CONFIG = new DimConfig(true);
         ModGameRules.register();
     }
 
@@ -34,7 +28,7 @@ public class DimThread {
     }
 
     public static boolean isModPresent(String modid) {
-        return FMLLoader.getLoadingModList().getModFileById(modid) != null;
+        return FabricLoader.getInstance().isModLoaded(modid);
     }
 
     public static synchronized void swapThreadsAndRun(Runnable task, Object... threadedObjects) {

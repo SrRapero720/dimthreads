@@ -2,16 +2,15 @@ package me.srrapero720.dimthread.mixin.impl;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import me.srrapero720.dimthread.DimConfig;
 import me.srrapero720.dimthread.DimThread;
 import me.srrapero720.dimthread.thread.ThreadPool;
 import me.srrapero720.dimthread.util.CrashInfo;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.GameRules;
-import net.minecraftforge.event.ForgeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,6 +18,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
@@ -37,17 +37,16 @@ public abstract class MinecraftServerMixin {
      * @see MinecraftServerMixin#tickWorlds(BooleanSupplier, CallbackInfo)
      */
     @WrapOperation(method = "tickChildren", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/server/MinecraftServer;getWorldArray()[Lnet/minecraft/server/level/ServerLevel;", remap = false))
-    public ServerLevel[] tickWorlds(MinecraftServer instance, Operation<ServerLevel[]> original) {
-        return DimThread.MANAGER.isActive((MinecraftServer) (Object) this) ? new ServerLevel[]{} : original.call(instance);
+        target = "Lnet/minecraft/server/MinecraftServer;getAllLevels()Ljava/lang/Iterable;", remap = false))
+    public Iterable<ServerLevel> tickWorlds(MinecraftServer instance, Operation<Iterable<ServerLevel>> original) {
+        return DimThread.MANAGER.isActive((MinecraftServer) (Object) this) ? new ArrayList<>() : original.call(instance);
     }
 
     /**
      * Distributes world ticking over (at least) 3 worker threads (one for each dimension) and waits until
      * they are all complete.
      */
-    @Inject(method = "tickChildren", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/server/MinecraftServer;getWorldArray()[Lnet/minecraft/server/level/ServerLevel;", remap = false))
+    @Inject(method = "tickChildren", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;hasNext()Z", ordinal = 0, remap = false))
     public void tickWorlds(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         if (!DimThread.MANAGER.isActive((MinecraftServer) (Object) this)) return;
 
@@ -66,20 +65,20 @@ public abstract class MinecraftServerMixin {
             }
 
             DimThread.swapThreadsAndRun(() -> {
-                ForgeEventFactory.onPreLevelTick(level, shouldKeepTicking);
+                ServerTickEvents.START_WORLD_TICK.invoker().onStartTick(level);
                 try {
                     level.tick(shouldKeepTicking);
                 } catch (Throwable throwable) {
                     crash.set(new CrashInfo(level, throwable));
                 }
-                ForgeEventFactory.onPostLevelTick(level, shouldKeepTicking);
+                ServerTickEvents.END_WORLD_TICK.invoker().onEndTick(level);
             }, level, level.getChunkSource());
         });
 
         pool.awaitCompletion();
 
         if (crash.get() != null) {
-            if (DimConfig.IGNORE_TICK_CRASH.get() && dimthreads$initialException.compareAndSet(null, crash.get())) {
+            if (DimThread.CONFIG.IGNORE_TICK_CRASH && dimthreads$initialException.compareAndSet(null, crash.get())) {
                 crash.get().report("Exception ticking world (asynchronously) -> EFFECTIVELY IGNORED");
             } else {
                 crash.get().crash("Exception ticking world (asynchronously)");

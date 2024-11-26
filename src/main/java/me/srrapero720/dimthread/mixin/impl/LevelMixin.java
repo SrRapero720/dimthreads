@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(Level.class)
 public class LevelMixin {
-    @Shadow public Thread thread;
+    @Shadow private Thread thread;
 
     /**
      * Thread check was done to prevent deadlocks loading multiple chunks of async task.

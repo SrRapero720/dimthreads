@@ -15,7 +15,7 @@ public class ModGameRules {
 		ACTIVE = BoolRule.builder("active", GameRules.Category.UPDATES).setInitial(true)
 				.setCallback(DimThread.MANAGER::setActive).build();
 
-		THREAD_COUNT = IntRule.builder("thread_count", GameRules.Category.UPDATES).setInitial(Math.min(DimConfig.DEFAULT_GAMERULE_THREADS.get(), Runtime.getRuntime().availableProcessors()))
+		THREAD_COUNT = IntRule.builder("thread_count", GameRules.Category.UPDATES).setInitial(Math.min(DimThread.CONFIG.DEFAULT_GAMERULE_THREADS, Runtime.getRuntime().availableProcessors()))
 				.setBounds(1, Runtime.getRuntime().availableProcessors()).setCallback(DimThread.MANAGER::setThreadCount).build();
 	}
 
