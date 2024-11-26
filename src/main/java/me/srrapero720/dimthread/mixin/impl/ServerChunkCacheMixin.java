@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = ServerChunkCache.class, priority = 1001)
-public abstract class ServerChunkManagerMixin extends ChunkSource implements IMutableMainThread {
+public abstract class ServerChunkCacheMixin extends ChunkSource implements IMutableMainThread {
 	@Shadow public Thread mainThread;
 	@Shadow @Final public ChunkMap chunkMap;
 	@Shadow @Final public ServerLevel level;

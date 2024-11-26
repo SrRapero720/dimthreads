@@ -12,7 +12,7 @@
     "LevelMixin",
     "MinecraftServerMixin",
     "RedstoneWireBlockMixin",
-    "ServerChunkManagerMixin"
+    "ServerChunkCacheMixin"
   ],
   "injectors": {
     "defaultRequire": 1
