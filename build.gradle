@@ -10,10 +10,9 @@ plugins {
     id 'net.darkhax.curseforgegradle' version '1.1.+'
 }
 
-version = "${mcversion}-v${modversion}"
-
 base {
     archivesName = modid
+    version = "$modloader-mc$mcversion-v$modversion"
     targetCompatibility = JavaVersion.VERSION_17
     sourceCompatibility = JavaVersion.VERSION_17
 }
@@ -129,6 +128,10 @@ task upload(type: GradleBuild) {
 }
 
 task curseforge(type: TaskPublishCurseForge) {
+    afterEvaluate {
+        dependsOn("jarJar")
+    }
+
     disableVersionDetection()
     apiToken = System.getenv("CURSEFORGE_TOKEN")
 
