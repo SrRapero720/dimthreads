@@ -18,8 +18,6 @@ public class LevelMixin {
     @Redirect(method = "getBlockEntity", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;currentThread()Ljava/lang/Thread;"))
     private Thread recallForDimthreads() {
         Thread t = Thread.currentThread();
-        // TODO: this is not appropriate,
-        //  it requires a queue of dimthreads calling this considering how chunkloading works
         return DimThread.owns(t) && DimThread.owns(this.thread) ? this.thread : t; // mock the check
     }
 }

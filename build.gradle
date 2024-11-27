@@ -27,6 +27,7 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'terminal.jline', 'true'
+            property 'mixin.debug.export', 'true'
             arg "--nogui"
             mods {
                 "${modid}" {

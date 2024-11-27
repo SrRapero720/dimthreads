@@ -4,7 +4,6 @@ import java.lang.annotation.*;
 
 @Documented
 @Retention(RetentionPolicy.CLASS)
-@Target(ElementType.TYPE)
-public @interface Volatilize {
-    boolean declared() default false;
+@Target(ElementType.FIELD)
+public @interface ThreadLocal {
 }
