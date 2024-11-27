@@ -12,7 +12,8 @@
     "LevelMixin",
     "MinecraftServerMixin",
     "RedstoneWireBlockMixin",
-    "ServerChunkCacheMixin"
+    "ServerChunkCacheMixin",
+    "mi_405388.ChunkEventListenerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

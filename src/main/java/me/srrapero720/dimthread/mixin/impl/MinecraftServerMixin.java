@@ -8,8 +8,10 @@ import me.srrapero720.dimthread.thread.ThreadPool;
 import me.srrapero720.dimthread.util.CrashInfo;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.level.GameRules;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,7 +54,7 @@ public abstract class MinecraftServerMixin {
         if (!DimThread.MANAGER.isActive((MinecraftServer) (Object) this)) return;
 
         AtomicReference<CrashInfo> crash = new AtomicReference<>();
-        ThreadPool pool = DimThread.getThreadPool((MinecraftServer) (Object) this);
+        ThreadPool pool = DimThread.getThreadPool(self());
 
         pool.execute(this.getAllLevels(), level -> {
             DimThread.attach(Thread.currentThread(), level);
@@ -95,5 +97,10 @@ public abstract class MinecraftServerMixin {
     public void shutdownThreadpool(CallbackInfo ci) {
         DimThread.MANAGER.threadPools.forEach((server, pool) -> pool.shutdown());
         DimThread.MANAGER.clear();
+    }
+
+    @Unique
+    private MinecraftServer self() {
+        return (MinecraftServer) (Object) this;
     }
 }

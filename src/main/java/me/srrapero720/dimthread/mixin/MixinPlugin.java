@@ -1,6 +1,7 @@
 package me.srrapero720.dimthread.mixin;
 
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
+import me.srrapero720.dimthread.DimThread;
 import me.srrapero720.dimthread.mixin.tools.Synchronized;
 import me.srrapero720.dimthread.mixin.tools.ThreadLocal;
 import me.srrapero720.dimthread.mixin.tools.Volatile;
@@ -31,7 +32,13 @@ public class MixinPlugin implements IMixinConfigPlugin {
     @Override public List<String> getMixins() {return null;}
 
 
-    @Override public boolean shouldApplyMixin(String s, String s1) {return true;}
+    @Override public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        if (mixinClassName.contains(".mi_405388.")) {
+            if (!DimThread.isModPresent("modern_industrialization")) return false;
+            this.warnAboutCompatMixins("Modern Industrialization", "405388", DimThread.MOD_ID);
+        }
+        return true;
+    }
     @Override public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {}
 
     @Override
@@ -278,6 +285,10 @@ public class MixinPlugin implements IMixinConfigPlugin {
             default ->
                     instructions.insertBefore(insn, new TypeInsnNode(Opcodes.CHECKCAST, targetType.getInternalName()));
         }
+    }
+
+    private void warnAboutCompatMixins(String modName, String cfid, String current) {
+        LOGGER.warn(IT, "{} Mod ({}) is forced by {} to be compatible with it, please report issues with that mod to the {} authors", modName, cfid, current, current);
     }
 
     private static String getDescriptor(Class<? extends Annotation> clazz) {
